@@ -23,22 +23,36 @@
                 <select name="shipping_service_id" required>
                     <option value="">Pilih ekspedisi</option>
                     @foreach($shippingServices as $service)
-                        <option value="{{ $service->id }}" @selected(old('shipping_service_id') == $service->id)>{{ $service->courier }} - {{ $service->service }} ({{ $service->eta }}) - Rp{{ number_format($service->cost,0,',','.') }}</option>
+                        <option value="{{ $service->id }}"
+                                data-cost="{{ $service->cost }}"
+                                @selected(old('shipping_service_id') == $service->id)>
+                            {{ $service->courier }} - {{ $service->service }} ({{ $service->eta }}) - Rp{{ number_format($service->cost,2,',','.') }}
+                        </option>
                     @endforeach
                 </select>
             </label>
 
-            <button class="btn">Buat Pesanan</button>
+            <button class="btn" @disabled($shippingServices->isEmpty())>Buat Pesanan</button>
+            @if($shippingServices->isEmpty())
+                <p class="validation-error">Belum ada layanan pengiriman aktif. Hubungi admin sebelum checkout.</p>
+            @endif
         </form>
     </div>
 
     <div class="card">
         <h3>Ringkasan</h3>
         @foreach($items as $item)
-            <p>{{ $item['product']->name }} x {{ $item['quantity'] }} = Rp{{ number_format($item['lineTotal'],0,',','.') }}</p>
+            <p>{{ $item['product']->name }} x {{ $item['quantity'] }} = Rp{{ number_format($item['lineTotal'],2,',','.') }}</p>
         @endforeach
         <hr>
-        <strong>Subtotal Rp{{ number_format($subtotal,0,',','.') }}</strong>
+        <div data-subtotal="{{ $subtotal }}">
+            <strong>Subtotal Rp{{ number_format($subtotal,2,',','.') }}</strong>
+        </div>
+        <div class="summary-line">
+            <span>Ongkos kirim</span>
+            <strong data-shipping-total>Pilih ekspedisi</strong>
+        </div>
+        <div class="summary-total" data-order-total></div>
         <p class="muted">Ongkir ditambahkan sesuai ekspedisi yang dipilih.</p>
     </div>
 </div>
